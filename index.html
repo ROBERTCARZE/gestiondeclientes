@@ -1,0 +1,1343 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sistema de Gestión Tributaria</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Century+Gothic:wght@400;700&display=swap');
+
+  :root {
+    --azul:       #1565c0;
+    --azul-claro: #1e88e5;
+    --azul-bg:    #e8f0fe;
+    --dorado:     #e65100;
+    --dorado2:    #f57c00;
+    --texto:      #1a2433;
+    --texto2:     #455a64;
+    --texto3:     #78909c;
+    --borde:      #cfd8dc;
+    --fondo:      #f5f7fa;
+    --blanco:     #ffffff;
+    --rojo:       #c62828;
+    --verde:      #2e7d32;
+    --fila-h:     18pt;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    font-family:'Century Gothic','CenturyGothic',AppleGothic,sans-serif;
+    font-size:12px;
+    background:var(--fondo);
+    color:var(--texto);
+    min-height:100vh;
+  }
+
+  /* ===== LOGIN ===== */
+  #login-screen {
+    display:flex; align-items:center; justify-content:center;
+    min-height:100vh;
+    background:linear-gradient(135deg,#e8f0fe 0%,#f5f7fa 50%,#e3f2fd 100%);
+  }
+  .login-box {
+    background:var(--blanco);
+    border:1px solid var(--borde);
+    border-radius:14px;
+    padding:48px 52px;
+    width:420px;
+    box-shadow:0 8px 40px rgba(21,101,192,0.12);
+    animation:fadeUp .5s ease;
+  }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+  .login-logo { text-align:center; margin-bottom:32px; }
+  .login-logo .icono { font-size:44px; }
+  .login-logo h1 { font-size:16px; font-weight:700; color:var(--azul); letter-spacing:2px; text-transform:uppercase; margin-top:8px; }
+  .login-logo p  { font-size:10px; color:var(--texto3); letter-spacing:1px; margin-top:4px; }
+  .fg { margin-bottom:18px; }
+  .fg label { display:block; font-size:10px; letter-spacing:1px; color:var(--texto3); text-transform:uppercase; margin-bottom:6px; }
+  .fg input {
+    width:100%; padding:11px 14px;
+    border:1px solid var(--borde); border-radius:7px;
+    color:var(--texto); font-family:inherit; font-size:12px;
+    background:var(--blanco); transition:border-color .2s;
+  }
+  .fg input:focus { outline:none; border-color:var(--azul); }
+  .btn-login {
+    width:100%; padding:13px;
+    background:linear-gradient(135deg,var(--azul),var(--azul-claro));
+    border:none; border-radius:7px; color:#fff;
+    font-family:inherit; font-size:12px; font-weight:700;
+    letter-spacing:2px; text-transform:uppercase; cursor:pointer;
+    transition:all .3s; margin-top:6px;
+  }
+  .btn-login:hover { transform:translateY(-1px); box-shadow:0 6px 20px rgba(21,101,192,.35); }
+  .config-note { font-size:10px; color:var(--texto3); text-align:center; margin-top:18px; line-height:1.7; }
+  .config-note a { color:var(--azul); cursor:pointer; text-decoration:underline; }
+
+  /* ===== APP ===== */
+  #app { display:none; min-height:100vh; flex-direction:column; }
+
+  /* HEADER */
+  .header {
+    background:var(--blanco);
+    border-bottom:2px solid var(--azul);
+    padding:0 28px; height:60px;
+    display:flex; align-items:center; justify-content:space-between;
+    position:sticky; top:0; z-index:100;
+    box-shadow:0 2px 12px rgba(21,101,192,.1);
+  }
+  .hbrand { display:flex; align-items:center; gap:10px; }
+  .hbrand .ico { font-size:26px; }
+  .hbrand h2 { font-size:13px; font-weight:700; letter-spacing:2px; color:var(--azul); text-transform:uppercase; }
+  .hbrand span { font-size:10px; color:var(--texto3); }
+  .hactions { display:flex; gap:10px; align-items:center; }
+
+  /* BOTONES */
+  .btn {
+    padding:7px 18px; border:none; border-radius:6px;
+    font-family:inherit; font-size:11px; font-weight:700;
+    letter-spacing:1px; text-transform:uppercase; cursor:pointer;
+    transition:all .22s; display:flex; align-items:center; gap:5px; height:36px;
+  }
+  .btn-primary { background:linear-gradient(135deg,var(--azul),var(--azul-claro)); color:#fff; }
+  .btn-primary:hover { transform:translateY(-1px); box-shadow:0 4px 14px rgba(21,101,192,.4); }
+  .btn-warning { background:linear-gradient(135deg,#e65100,#f57c00); color:#fff; }
+  .btn-warning:hover { transform:translateY(-1px); box-shadow:0 4px 14px rgba(230,81,0,.4); }
+  .btn-danger  { background:linear-gradient(135deg,#b71c1c,#e53935); color:#fff; }
+  .btn-danger:hover  { transform:translateY(-1px); box-shadow:0 4px 14px rgba(183,28,28,.3); }
+  .btn-success { background:linear-gradient(135deg,#1b5e20,#388e3c); color:#fff; }
+  .btn-success:hover { transform:translateY(-1px); box-shadow:0 4px 14px rgba(27,94,32,.3); }
+  .btn-secondary { background:var(--fondo); color:var(--texto2); border:1px solid var(--borde); }
+  .btn-secondary:hover { background:#e0e7ef; }
+  .btn-dorado { background:linear-gradient(135deg,var(--dorado),var(--dorado2)); color:#fff; }
+  .btn-dorado:hover { transform:translateY(-1px); box-shadow:0 4px 14px rgba(230,81,0,.35); }
+  .btn-sm {
+    padding:4px 11px; border:none; border-radius:4px;
+    font-family:inherit; font-size:10px; font-weight:700; cursor:pointer; transition:all .2s;
+  }
+  .btn-sm-primary { background:var(--azul-bg); color:var(--azul); }
+  .btn-sm-primary:hover { background:#c5d9f8; }
+
+  /* MAIN */
+  .main { flex:1; padding:28px 32px; display:flex; flex-direction:column; gap:22px; }
+
+  /* PANEL ALERTAS */
+  .alertas {
+    background:var(--blanco); border:1px solid var(--borde); border-radius:12px;
+    padding:24px 28px; display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:18px;
+  }
+  .alerta-card {
+    background:var(--fondo); border-radius:10px; padding:18px 22px;
+    border-left:4px solid; position:relative;
+  }
+  .alerta-card.pendiente { border-color:#f57c00; }
+  .alerta-card.total     { border-color:var(--azul); }
+  .alerta-card.activos   { border-color:#388e3c; }
+  .alerta-card.periodo   { border-color:#7b1fa2; }
+  .ac-num { font-size:34px; font-weight:700; line-height:1; margin-bottom:5px; }
+  .alerta-card.pendiente .ac-num { color:#e65100; }
+  .alerta-card.total     .ac-num { color:var(--azul); }
+  .alerta-card.activos   .ac-num { color:#388e3c; }
+  .alerta-card.periodo   .ac-num { color:#7b1fa2; font-size:18px; }
+  .ac-label { font-size:10px; letter-spacing:1.5px; text-transform:uppercase; color:var(--texto3); }
+  .ac-sub   { font-size:10px; color:var(--texto3); margin-top:3px; }
+
+  /* SECCIÓN */
+  .sec-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; }
+  .sec-title  { font-size:13px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:var(--azul); }
+
+  /* TABLA */
+  .tabla-wrap { background:var(--blanco); border:1px solid var(--borde); border-radius:12px; overflow:hidden; }
+  table { width:100%; border-collapse:collapse; }
+  thead { background:var(--azul-bg); }
+  th {
+    padding:12px 14px; text-align:left;
+    font-size:10px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase;
+    color:var(--azul); border-bottom:1px solid var(--borde);
+  }
+  td {
+    padding:0 14px; height:var(--fila-h); font-size:12px;
+    border-bottom:1px solid #f0f4f8; vertical-align:middle; color:var(--texto);
+  }
+  tr:last-child td { border-bottom:none; }
+  tr:hover td { background:#f0f6ff; }
+  .badge { display:inline-block; padding:2px 9px; border-radius:20px; font-size:10px; font-weight:700; }
+  .badge-activo   { background:#e8f5e9; color:#2e7d32; border:1px solid #c8e6c9; }
+  .badge-inactivo { background:#fce4e4; color:#c62828; border:1px solid #ffcdd2; }
+  .badge-rus  { background:#fff8e1; color:#e65100; border:1px solid #ffe082; }
+  .badge-rer  { background:#e3f2fd; color:#1565c0; border:1px solid #bbdefb; }
+  .badge-rg   { background:#f3e5f5; color:#6a1b9a; border:1px solid #e1bee7; }
+  .badge-mype { background:#e8f5e9; color:#1b5e20; border:1px solid #c8e6c9; }
+  .loading-row td { text-align:center; color:var(--texto3); padding:28px; }
+
+  /* MODALES */
+  .modal-overlay {
+    display:none; position:fixed; inset:0;
+    background:rgba(21,50,100,.35); z-index:1000;
+    align-items:center; justify-content:center;
+    backdrop-filter:blur(3px);
+  }
+  .modal-overlay.active { display:flex; }
+  .modal {
+    background:var(--blanco); border:1px solid var(--borde); border-radius:14px;
+    padding:32px 36px; width:580px; max-width:95vw; max-height:90vh; overflow-y:auto;
+    box-shadow:0 16px 60px rgba(21,101,192,.18);
+    animation:slideIn .25s ease; position:relative;
+  }
+  .modal-lg { width:800px; }
+  @keyframes slideIn { from{transform:translateY(-16px);opacity:0} to{transform:translateY(0);opacity:1} }
+  .modal-header {
+    display:flex; align-items:center; justify-content:space-between;
+    margin-bottom:24px; padding-bottom:14px; border-bottom:1px solid var(--borde);
+  }
+  .modal-title { font-size:14px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:var(--azul); }
+  .modal-close {
+    width:30px; height:30px; border:none; border-radius:50%;
+    background:#fce4e4; color:#c62828; font-size:14px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; transition:background .2s;
+  }
+  .modal-close:hover { background:#ffcdd2; }
+  .form-row { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:14px; }
+  .form-row.tres { grid-template-columns:1fr 1fr 1fr; }
+  .form-row.uno  { grid-template-columns:1fr; }
+  .field { display:flex; flex-direction:column; gap:5px; }
+  .field label { font-size:10px; letter-spacing:1px; color:var(--texto3); text-transform:uppercase; }
+  .field input, .field select {
+    padding:9px 13px; border:1px solid var(--borde); border-radius:6px;
+    color:var(--texto); font-family:inherit; font-size:12px;
+    background:var(--blanco); transition:border-color .2s;
+  }
+  .field input:focus, .field select:focus { outline:none; border-color:var(--azul); }
+  .field input[readonly] { color:var(--texto3); background:var(--fondo); }
+  .modal-footer { display:flex; gap:10px; justify-content:flex-end; margin-top:22px; padding-top:18px; border-top:1px solid var(--borde); }
+
+  /* INFO CLIENTE (en modal tributario) */
+  .info-cli {
+    background:var(--fondo); border-radius:8px; padding:14px 18px;
+    margin-bottom:18px; display:grid; grid-template-columns:repeat(3,1fr); gap:10px;
+    border:1px solid var(--borde);
+  }
+  .info-item { }
+
+  .ii-label { font-size:9px; color:var(--texto3); letter-spacing:1px; text-transform:uppercase; }
+  .ii-val   { font-size:12px; color:var(--texto); margin-top:2px; font-weight:600; }
+
+  /* TARJETAS TRIBUTARIAS */
+  .trib-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:14px; margin:16px 0; }
+  .trib-card { background:var(--fondo); border-radius:8px; padding:16px; border:1px solid var(--borde); }
+  .tc-label { font-size:10px; color:var(--texto3); letter-spacing:1px; text-transform:uppercase; margin-bottom:6px; }
+  .tc-val   { font-size:17px; font-weight:700; color:var(--texto); }
+  .trib-card.igv .tc-val    { color:#e65100; }
+  .trib-card.renta .tc-val  { color:var(--azul); }
+  .trib-card.sp .tc-val     { color:#388e3c; }
+  .trib-card.sn .tc-val     { color:#c62828; }
+
+  /* SELECTOR DE PERIODOS */
+  .periodos-wrap {
+    background:var(--fondo); border:1px solid var(--borde); border-radius:10px;
+    padding:16px 18px; margin-bottom:16px;
+  }
+  .periodos-titulo { font-size:10px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--texto3); margin-bottom:12px; }
+
+  /* Selector de año */
+  .anio-nav { display:flex; align-items:center; gap:8px; margin-bottom:12px; }
+  .anio-nav button {
+    width:28px; height:28px; border:1px solid var(--borde); border-radius:50%;
+    background:var(--blanco); color:var(--texto2); font-size:14px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; transition:all .2s; font-family:inherit;
+  }
+  .anio-nav button:hover { border-color:var(--azul); color:var(--azul); background:var(--azul-bg); }
+  .anio-nav .anio-label { font-size:13px; font-weight:700; color:var(--texto); min-width:48px; text-align:center; }
+
+  /* Grid meses 4x3 */
+  .meses-grid {
+    display:grid; grid-template-columns:repeat(4,1fr); gap:7px;
+  }
+  .mes-btn {
+    padding:8px 4px; border:1px solid var(--borde); border-radius:7px;
+    background:var(--blanco); color:var(--texto2); font-family:inherit;
+    font-size:11px; font-weight:700; cursor:pointer; transition:all .18s;
+    text-align:center; position:relative; line-height:1.2;
+  }
+  .mes-btn:hover { border-color:var(--azul); color:var(--azul); background:var(--azul-bg); }
+  .mes-btn.activo { background:var(--azul); color:#fff; border-color:var(--azul); }
+  .mes-btn.con-datos { border-color:#388e3c; color:#2e7d32; background:#f1f8f1; }
+  .mes-btn.con-datos::after { content:'●'; position:absolute; top:3px; right:5px; font-size:7px; color:#388e3c; }
+  .mes-btn.con-datos.activo { background:#2e7d32; color:#fff; border-color:#2e7d32; }
+  .mes-btn.con-datos.activo::after { color:rgba(255,255,255,.6); }
+  .mes-btn.futuro { opacity:.35; cursor:not-allowed; }
+
+  .leyenda-periodos { display:flex; gap:14px; margin-top:10px; font-size:10px; color:var(--texto3); }
+  .leyenda-periodos span { display:flex; align-items:center; gap:4px; }
+  .dot { width:8px; height:8px; border-radius:50%; display:inline-block; }
+  .dot-verde { background:#388e3c; }
+  .dot-azul  { background:var(--azul); }
+
+  .periodo-selector-row { display:flex; gap:10px; align-items:flex-end; margin-bottom:14px; }
+  .periodo-selector-row .field { flex:1; }
+  .periodo-selector-row .btn  { height:36px; flex-shrink:0; }
+
+  /* BUSCADOR */
+  .search-results {
+    max-height:190px; overflow-y:auto;
+    border:1px solid var(--borde); border-radius:6px; margin-top:6px; display:none;
+    background:var(--blanco);
+  }
+  .search-item {
+    padding:9px 13px; cursor:pointer; border-bottom:1px solid #f0f4f8;
+    transition:background .15s; font-size:12px; color:var(--texto);
+  }
+  .search-item:hover { background:var(--azul-bg); }
+  .search-item .ruc-tag { font-size:10px; color:var(--texto3); margin-left:8px; }
+
+  /* CONFIG PANEL */
+  .config-panel {
+    background:#fff8e1; border:1px solid #ffe082; border-radius:8px;
+    padding:14px 18px; margin-bottom:20px; font-size:11px; display:none;
+  }
+  .config-panel.show { display:block; }
+  .config-panel p { color:#e65100; font-weight:700; margin-bottom:8px; }
+  .config-steps li { color:var(--texto2); margin-bottom:5px; line-height:1.6; }
+  .config-panel code { background:#fff3cd; padding:1px 5px; border-radius:3px; color:#bf360c; }
+
+  /* NOTIF */
+  .notif {
+    position:fixed; top:70px; right:20px; padding:12px 20px;
+    border-radius:7px; font-size:12px; font-weight:700; z-index:9999;
+    animation:slideInR .3s ease; max-width:300px; box-shadow:0 6px 20px rgba(0,0,0,.15);
+  }
+  @keyframes slideInR { from{transform:translateX(110%);opacity:0} to{transform:translateX(0);opacity:1} }
+  .notif-success { background:#e8f5e9; color:#2e7d32; border:1px solid #c8e6c9; }
+  .notif-error   { background:#fce4e4; color:#c62828; border:1px solid #ffcdd2; }
+  .notif-info    { background:var(--azul-bg); color:var(--azul); border:1px solid #bbdefb; }
+
+  /* PERIODO BADGE HEADER */
+  .periodo-badge {
+    background:var(--azul-bg); border:1px solid #bbdefb;
+    border-radius:6px; padding:4px 12px; font-size:11px; color:var(--azul); font-weight:700;
+  }
+
+  /* MODO EDICIÓN */
+  #modo-edicion {
+    border-top:1px solid var(--borde); padding-top:16px; margin-top:16px;
+  }
+  #modo-edicion .ed-title {
+    font-size:11px; color:var(--dorado); font-weight:700; margin-bottom:12px; letter-spacing:1px;
+  }
+
+  .spinner {
+    width:18px; height:18px;
+    border:2px solid rgba(21,101,192,.2); border-top-color:var(--azul);
+    border-radius:50%; animation:spin .8s linear infinite; display:inline-block;
+  }
+  @keyframes spin { to{transform:rotate(360deg)} }
+
+  /* REPORTE */
+  #reporte-contenido {
+    background:#fff; color:#1a1a1a; padding:36px;
+    border-radius:8px; border:1px solid var(--borde);
+  }
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="login-box">
+    <div class="login-logo">
+      <div class="icono">🏛️</div>
+      <h1>GestiónTributaria</h1>
+      <p>Sistema de Administración Fiscal</p>
+    </div>
+    <div class="fg">
+      <label>Usuario</label>
+      <input type="text" id="login-usuario" placeholder="Ingrese su usuario">
+    </div>
+    <div class="fg">
+      <label>Contraseña</label>
+      <input type="password" id="login-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')iniciarSesion()">
+    </div>
+    <button class="btn-login" onclick="iniciarSesion()">🔐 Ingresar al Sistema</button>
+    <div class="config-note">
+      Primera vez? <a onclick="abrirModalConfig()">Configure su Google Sheets</a><br>
+      Sistema de Gestión Tributaria v2.1
+    </div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <div class="header">
+    <div class="hbrand">
+      <div class="ico">🏛️</div>
+      <div>
+        <h2>GestiónTributaria</h2>
+        <span id="usuario-activo">Sistema de Administración Fiscal</span>
+      </div>
+    </div>
+    <div class="hactions">
+      <div class="periodo-badge" id="periodo-actual">📅 —</div>
+      <button class="btn btn-primary"  onclick="abrirNuevoUsuario()">➕ Nuevo Usuario</button>
+      <button class="btn btn-warning"  onclick="abrirBuscador()">🔍 Llamar</button>
+      <button class="btn btn-danger"   onclick="cerrarSesion()">🚪 Cerrar Sesión</button>
+    </div>
+  </div>
+
+  <div class="main">
+
+    <!-- CONFIG PANEL -->
+    <div class="config-panel" id="config-panel">
+      <p>⚠️ Configure su conexión con Google Sheets</p>
+      <ol class="config-steps">
+        <li>Cree una hoja de Google Sheets con pestañas <code>CLIENTES</code> e <code>IMPUESTOS</code></li>
+        <li>En Apps Script pegue el código del archivo <code>apps_script.gs</code></li>
+        <li>Ejecute <code>configurarSistema()</code> una vez</li>
+        <li>Implemente como Web App y copie la URL abajo:</li>
+      </ol>
+      <div style="display:flex;gap:8px;margin-top:10px;">
+        <input type="text" id="sheets-url-panel" placeholder="https://script.google.com/macros/s/..."
+          style="flex:1;padding:8px 12px;border:1px solid var(--borde);border-radius:5px;font-family:inherit;font-size:11px;color:var(--texto);">
+        <button class="btn btn-success" onclick="guardarConfigPanel()" style="height:36px;font-size:11px;">Guardar</button>
+      </div>
+    </div>
+
+    <!-- ALERTAS -->
+    <div class="alertas">
+      <div class="alerta-card pendiente">
+        <div class="ac-num" id="cnt-pendientes">—</div>
+        <div class="ac-label">Pendientes de Declarar</div>
+        <div class="ac-sub" id="sub-pendientes">Periodo actual</div>
+      </div>
+      <div class="alerta-card total">
+        <div class="ac-num" id="cnt-total">—</div>
+        <div class="ac-label">Total Clientes</div>
+        <div class="ac-sub">Registrados en sistema</div>
+      </div>
+      <div class="alerta-card activos">
+        <div class="ac-num" id="cnt-activos">—</div>
+        <div class="ac-label">Clientes Activos</div>
+        <div class="ac-sub">Estado activo</div>
+      </div>
+      <div class="alerta-card periodo">
+        <div class="ac-num" id="cnt-periodo">—</div>
+        <div class="ac-label">Periodo Actual</div>
+        <div class="ac-sub">Mes en curso</div>
+      </div>
+    </div>
+
+    <!-- TABLA -->
+    <div>
+      <div class="sec-header">
+        <div class="sec-title">📋 Listado de Clientes</div>
+        <button class="btn btn-secondary" onclick="cargarDatos()" style="height:34px;font-size:11px;">🔄 Actualizar</button>
+      </div>
+      <div class="tabla-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>#</th><th>RUC</th><th>Razón Social / Nombre</th>
+              <th>Régimen</th><th>AFP</th><th>Estado</th><th>Inicio Op.</th><th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody id="tabla-clientes">
+            <tr class="loading-row"><td colspan="8">🔄 Conectando con Google Sheets...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- MODAL NUEVO USUARIO -->
+<div class="modal-overlay" id="modal-nuevo">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">➕ Nuevo Cliente</div>
+      <button class="modal-close" onclick="cerrarModal('modal-nuevo')">✕</button>
+    </div>
+    <div class="form-row">
+      <div class="field"><label>N° Correlativo</label><input type="text" id="nu-correlativo" readonly placeholder="Auto"></div>
+      <div class="field"><label>RUC *</label><input type="text" id="nu-ruc" placeholder="20123456789" maxlength="11"></div>
+    </div>
+    <div class="form-row uno">
+      <div class="field"><label>Razón Social / Nombre *</label><input type="text" id="nu-nombre" placeholder="Nombre completo o razón social"></div>
+    </div>
+    <div class="form-row">
+      <div class="field"><label>Usuario (acceso) *</label><input type="text" id="nu-usuario" placeholder="usuario_sunat"></div>
+      <div class="field"><label>Contraseña *</label><input type="text" id="nu-password" placeholder="Contraseña"></div>
+    </div>
+    <div class="form-row tres">
+      <div class="field"><label>Régimen *</label>
+        <select id="nu-regimen" onchange="toggleOtrosRegimen(this.value)">
+          <option value="">Seleccionar...</option>
+          <option>RUS</option><option>RER</option>
+          <option>RG</option><option>MYPE</option>
+          <option value="Otros">Otros</option>
+        </select>
+        <input type="text" id="nu-regimen-otros" placeholder="Especifique el régimen..." style="display:none;margin-top:7px;" maxlength="60">
+      </div>
+      <div class="field"><label>AFP *</label>
+        <select id="nu-afp" onchange="toggleAfpDetalle(this.value)">
+          <option value="">Seleccionar...</option>
+          <option value="ONP">ONP</option>
+          <option value="AFP">AFP</option>
+        </select>
+      </div>
+      <div class="field"><label>Estado</label>
+        <select id="nu-estado"><option value="ACTIVO">Activo</option><option value="INACTIVO">Inactivo</option></select>
+      </div>
+    </div>
+    <div id="afp-detalle-box" style="display:none;background:var(--azul-bg);border:1px solid #bbdefb;border-radius:8px;padding:14px 16px;margin-bottom:14px;">
+      <div style="font-size:10px;font-weight:700;color:var(--azul);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;">🏦 Datos AFP</div>
+      <div class="form-row">
+        <div class="field"><label>Usuario AFP *</label><input type="text" id="nu-afp-usuario" placeholder="usuario_afp"></div>
+        <div class="field"><label>Clave AFP *</label><input type="text" id="nu-afp-clave" placeholder="clave_afp"></div>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="field"><label>Inicio de Operaciones</label><input type="date" id="nu-inicio"></div>
+      <div class="field"><label>Teléfono</label><input type="text" id="nu-telefono" placeholder="999999999"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="cerrarModal('modal-nuevo')">Cancelar</button>
+      <button class="btn btn-success" onclick="grabarCliente()">💾 Grabar Cliente</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL BUSCADOR -->
+<div class="modal-overlay" id="modal-buscar">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">🔍 Buscar Cliente</div>
+      <button class="modal-close" onclick="cerrarModal('modal-buscar')">✕</button>
+    </div>
+    <div class="field" style="margin-bottom:14px;">
+      <label>Buscar por RUC o Nombre</label>
+      <input type="text" id="buscar-input" placeholder="Escriba RUC o nombre..." oninput="filtrarClientes(this.value)">
+      <div class="search-results" id="search-results"></div>
+    </div>
+    <div id="cliente-seleccionado" style="display:none;">
+      <div class="info-cli" id="info-cliente-data"></div>
+
+      <!-- SELECTOR DE PERIODOS HISTÓRICOS -->
+      <div class="periodos-wrap">
+        <div class="periodos-titulo">📅 Seleccionar Periodo</div>
+        <div class="anio-nav">
+          <button onclick="cambiarAnioB(-1)">◀</button>
+          <div class="anio-label" id="anio-buscar">2026</div>
+          <button onclick="cambiarAnioB(+1)">▶</button>
+        </div>
+        <div class="meses-grid" id="meses-buscar"></div>
+        <div class="leyenda-periodos">
+          <span><span class="dot dot-verde"></span> Con datos registrados</span>
+          <span><span class="dot dot-azul"></span> Seleccionado</span>
+        </div>
+        <input type="hidden" id="buscar-periodo">
+        <div style="margin-top:12px;text-align:right;">
+          <button class="btn btn-primary" onclick="consultarTributario()" style="height:36px;">📊 Ver Datos Tributarios</button>
+        </div>
+      </div>
+
+      <div class="modal-footer" style="margin-top:0;padding-top:14px;">
+        <button class="btn btn-secondary" onclick="limpiarBusqueda()">↩ Nueva Búsqueda</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL DATOS TRIBUTARIOS -->
+<div class="modal-overlay" id="modal-tributario">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <div class="modal-title">📊 Datos Tributarios</div>
+      <button class="modal-close" onclick="cerrarModal('modal-tributario')">✕</button>
+    </div>
+
+    <div class="info-cli" id="info-trib-cliente"></div>
+
+    <!-- Selector de periodo dentro del modal tributario -->
+    <div class="periodos-wrap" style="margin-bottom:16px;">
+      <div class="periodos-titulo">📅 Periodos del cliente</div>
+      <div class="anio-nav">
+        <button onclick="cambiarAnioT(-1)">◀</button>
+        <div class="anio-label" id="anio-trib">2026</div>
+        <button onclick="cambiarAnioT(+1)">▶</button>
+      </div>
+      <div class="meses-grid" id="meses-trib"></div>
+      <div class="leyenda-periodos">
+        <span><span class="dot dot-verde"></span> Con datos registrados</span>
+        <span><span class="dot dot-azul"></span> Periodo activo</span>
+      </div>
+    </div>
+
+    <div style="margin-bottom:14px;font-size:11px;color:var(--texto3);">
+      Consultando periodo: <span id="trib-periodo-label" style="color:var(--azul);font-weight:700;"></span>
+    </div>
+
+    <div class="trib-grid" id="tributario-grid"></div>
+
+    <div id="modo-edicion" style="display:none;">
+      <div class="ed-title">✏️ MODO EDICIÓN</div>
+      <div class="form-row tres">
+        <div class="field"><label>Compras (S/.)</label><input type="number" id="ed-compras" step="0.01"></div>
+        <div class="field"><label>Ventas (S/.)</label><input type="number" id="ed-ventas" step="0.01"></div>
+        <div class="field"><label>IGV (S/.)</label><input type="number" id="ed-igv" step="0.01"></div>
+      </div>
+      <div class="form-row tres">
+        <div class="field"><label>Renta (S/.)</label><input type="number" id="ed-renta" step="0.01"></div>
+        <div class="field"><label>Planilla (S/.)</label><input type="number" id="ed-planilla" step="0.01"></div>
+        <div class="field"><label>Saldo (S/.)</label><input type="number" id="ed-saldo" step="0.01"></div>
+      </div>
+    </div>
+
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="cerrarModal('modal-tributario')">Cerrar</button>
+      <button class="btn btn-primary" onclick="abrirEditarCliente()">✏️ Editar Cliente</button>
+      <button class="btn btn-warning" id="btn-editar" onclick="toggleEdicion()">✏️ Editar Tributos</button>
+      <button class="btn btn-success" id="btn-guardar" onclick="guardarCambiosTributarios()" style="display:none;">💾 Guardar Cambios</button>
+      <button class="btn btn-dorado" onclick="imprimirReporte()">🖨️ Imprimir Reporte</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- MODAL EDITAR CLIENTE -->
+<div class="modal-overlay" id="modal-editar-cliente">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">&#x270F;&#xFE0F; Editar Cliente</div>
+      <button class="modal-close" onclick="cerrarModal('modal-editar-cliente')">&#x2715;</button>
+    </div>
+    <div class="form-row">
+      <div class="field"><label>N&#xB0; Correlativo</label><input type="text" id="ec-correlativo" readonly></div>
+      <div class="field"><label>RUC</label><input type="text" id="ec-ruc" readonly></div>
+    </div>
+    <div class="form-row uno">
+      <div class="field"><label>Raz&#xF3;n Social / Nombre *</label><input type="text" id="ec-nombre" placeholder="Nombre completo o raz&#xF3;n social"></div>
+    </div>
+    <div class="form-row">
+      <div class="field"><label>Usuario (acceso) *</label><input type="text" id="ec-usuario" placeholder="usuario_sunat"></div>
+      <div class="field"><label>Contrase&#xF1;a</label><input type="text" id="ec-password" placeholder="Nueva contrase&#xF1;a"></div>
+    </div>
+    <div class="form-row tres">
+      <div class="field"><label>R&#xE9;gimen *</label>
+        <select id="ec-regimen">
+          <option value="">Seleccionar...</option>
+          <option>RUS</option><option>RER</option>
+          <option>RG</option><option>MYPE</option>
+          <option value="Otros">Otros</option>
+        </select>
+      </div>
+      <div class="field"><label>AFP</label>
+        <select id="ec-afp" onchange="toggleAfpDetalleEC(this.value)">
+          <option value="">Sin AFP</option>
+          <option value="ONP">ONP</option>
+          <option value="AFP">AFP</option>
+        </select>
+      </div>
+      <div class="field"><label>Estado</label>
+        <select id="ec-estado"><option value="ACTIVO">Activo</option><option value="INACTIVO">Inactivo</option></select>
+      </div>
+    </div>
+    <div id="afp-detalle-ec" style="display:none;background:var(--azul-bg);border:1px solid #bbdefb;border-radius:8px;padding:14px 16px;margin-bottom:14px;">
+      <div style="font-size:10px;font-weight:700;color:var(--azul);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px;">&#x1F3E6; Datos AFP</div>
+      <div class="form-row">
+        <div class="field"><label>Usuario AFP</label><input type="text" id="ec-afp-usuario" placeholder="usuario_afp"></div>
+        <div class="field"><label>Clave AFP</label><input type="text" id="ec-afp-clave" placeholder="clave_afp"></div>
+      </div>
+    </div>
+    <div class="form-row">
+      <div class="field"><label>Inicio de Operaciones</label><input type="date" id="ec-inicio"></div>
+      <div class="field"><label>Tel&#xE9;fono</label><input type="text" id="ec-telefono" placeholder="999999999"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="cerrarModal('modal-editar-cliente')">Cancelar</button>
+      <button class="btn btn-success" onclick="guardarEdicionCliente()">&#x1F4BE; Guardar Cambios</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL REPORTE -->
+<div class="modal-overlay" id="modal-reporte">
+  <div class="modal modal-lg">
+    <div class="modal-header">
+      <div class="modal-title">🖨️ Vista Previa del Reporte</div>
+      <button class="modal-close" onclick="cerrarModal('modal-reporte')">✕</button>
+    </div>
+    <div id="reporte-contenido"></div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="cerrarModal('modal-reporte')">Cerrar</button>
+      <button class="btn btn-dorado" onclick="window.print()">🖨️ Imprimir / Guardar PDF</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL CONFIG -->
+<div class="modal-overlay" id="modal-config">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-title">⚙️ Configuración de Google Sheets</div>
+      <button class="modal-close" onclick="cerrarModal('modal-config')">✕</button>
+    </div>
+    <div style="font-size:11px;color:var(--texto2);line-height:1.8;margin-bottom:18px;">
+      <p style="color:var(--azul);font-weight:700;margin-bottom:10px;">Pasos para conectar:</p>
+      <ol style="padding-left:18px;">
+        <li>Cree una hoja de Google Sheets</li>
+        <li>Cree pestañas: <code style="background:#e8f0fe;padding:1px 4px;border-radius:3px;color:var(--azul);">CLIENTES</code> e <code style="background:#e8f0fe;padding:1px 4px;border-radius:3px;color:var(--azul);">IMPUESTOS</code></li>
+        <li>Extensiones → Apps Script → Pegue el código</li>
+        <li>Ejecute <strong>configurarSistema()</strong> una vez</li>
+        <li>Implemente como Web App → copie URL abajo</li>
+      </ol>
+    </div>
+    <div class="field" style="margin-bottom:14px;">
+      <label>URL del Web App</label>
+      <input type="text" id="config-url" placeholder="https://script.google.com/macros/s/.../exec">
+    </div>
+    <div class="field" style="margin-bottom:12px;">
+      <label>Usuario Administrador</label>
+      <input type="text" id="config-admin-user" placeholder="admin">
+    </div>
+    <div class="field">
+      <label>Contraseña Administrador</label>
+      <input type="password" id="config-admin-pass" placeholder="••••••••">
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-secondary" onclick="cerrarModal('modal-config')">Cancelar</button>
+      <button class="btn btn-success" onclick="guardarConfigCompleta()">💾 Guardar Configuración</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ============================================================
+//  ESTADO GLOBAL
+// ============================================================
+let CONFIG = {
+  sheetsUrl:  localStorage.getItem('gt_url')  || '',
+  adminUser:  localStorage.getItem('gt_user') || 'admin',
+  adminPass:  localStorage.getItem('gt_pass') || 'admin123'
+};
+
+// Usuarios adicionales con acceso directo (sin necesitar Google Sheets)
+const USUARIOS_EXTRA = [
+  { usuario: 'Robert', password: '201238' },
+  { usuario: 'Monica', password: '916111913' }
+];
+let STATE = {
+  clientes: [], impuestos: [],
+  clienteActual: null, periodoActual: null, tributarioActual: null,
+  usuarioLogueado: null
+};
+
+const MESES = ['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SET','OCT','NOV','DIC'];
+
+function periodoActual() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+}
+function fmtPeriodo(p) {
+  if (!p) return '';
+  const [yr,mm] = p.split('-');
+  return `${MESES[parseInt(mm)-1]} ${yr}`;
+}
+
+// ============================================================
+//  INICIO
+// ============================================================
+window.onload = () => {
+  const p = periodoActual();
+  document.getElementById('periodo-actual').textContent = `📅 ${fmtPeriodo(p)}`;
+  document.getElementById('buscar-periodo').value = p;
+  document.getElementById('trib-periodo-input').value = p;
+  const ses = sessionStorage.getItem('gt_ses');
+  if (ses) { STATE.usuarioLogueado = ses; mostrarApp(); }
+};
+
+async function iniciarSesion() {
+  const u = document.getElementById('login-usuario').value.trim();
+  const p = document.getElementById('login-pass').value;
+  if (!u || !p) { notif('Complete usuario y contraseña','error'); return; }
+
+  // Admin principal
+  if (u === CONFIG.adminUser && p === CONFIG.adminPass) {
+    sessionStorage.setItem('gt_ses', u); STATE.usuarioLogueado = u; mostrarApp(); return;
+  }
+
+  // Usuarios extra (Robert, Monica, etc.)
+  const extra = USUARIOS_EXTRA.find(x => x.usuario === u && x.password === p);
+  if (extra) {
+    sessionStorage.setItem('gt_ses', u); STATE.usuarioLogueado = u; mostrarApp(); return;
+  }
+
+  if (CONFIG.sheetsUrl) {
+    try {
+      const r = await apiGet({ accion:'LOGIN', usuario:u, password:p });
+      if (r.ok) { sessionStorage.setItem('gt_ses', u); STATE.usuarioLogueado = u; mostrarApp(); }
+      else notif('Usuario o contraseña incorrectos','error');
+    } catch { notif('Error de conexión. Verifique la URL de Sheets.','error'); }
+  } else { notif('Usuario o contraseña incorrectos','error'); }
+}
+
+function mostrarApp() {
+  document.getElementById('login-screen').style.display = 'none';
+  document.getElementById('app').style.display = 'flex';
+  document.getElementById('usuario-activo').textContent = `👤 ${STATE.usuarioLogueado}`;
+  document.getElementById('cnt-periodo').textContent = fmtPeriodo(periodoActual());
+  const esUsuarioExtra = USUARIOS_EXTRA.some(x => x.usuario === STATE.usuarioLogueado);
+  if (!CONFIG.sheetsUrl && !esUsuarioExtra) document.getElementById('config-panel').classList.add('show');
+  else if (CONFIG.sheetsUrl) cargarDatos();
+}
+
+function cerrarSesion() {
+  if (!confirm('¿Desea cerrar sesión?')) return;
+  sessionStorage.removeItem('gt_ses');
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('login-screen').style.display = 'flex';
+  document.getElementById('login-usuario').value = '';
+  document.getElementById('login-pass').value = '';
+}
+
+// ============================================================
+//  API
+// ============================================================
+async function apiGet(params) {
+  const url = CONFIG.sheetsUrl + '?' + new URLSearchParams({ data: JSON.stringify(params) });
+  const r = await fetch(url);
+  return r.json();
+}
+async function apiPost(params) {
+  const r = await fetch(CONFIG.sheetsUrl, {
+    method:'POST', body:JSON.stringify(params),
+    headers:{'Content-Type':'text/plain'}
+  });
+  return r.json();
+}
+
+// ============================================================
+//  CARGAR DATOS
+// ============================================================
+async function cargarDatos() {
+  const tbody = document.getElementById('tabla-clientes');
+  tbody.innerHTML = '<tr class="loading-row"><td colspan="8"><span class="spinner"></span> Cargando datos...</td></tr>';
+  if (!CONFIG.sheetsUrl) {
+    tbody.innerHTML = '<tr class="loading-row"><td colspan="8">⚠️ Configure la URL de Google Sheets primero</td></tr>';
+    return;
+  }
+  try {
+    const [rc, ri] = await Promise.all([
+      apiGet({ accion:'GET_CLIENTES' }),
+      apiGet({ accion:'GET_IMPUESTOS' })
+    ]);
+    STATE.clientes  = rc.data || [];
+    STATE.impuestos = ri.data || [];
+    renderTabla();
+    actualizarContadores();
+    notif('Datos actualizados','success');
+  } catch(e) {
+    tbody.innerHTML = '<tr class="loading-row"><td colspan="8">❌ Error al cargar. Verifique conexión con Sheets.</td></tr>';
+    notif('Error de conexión','error');
+  }
+}
+
+function renderTabla() {
+  const tbody = document.getElementById('tabla-clientes');
+  if (!STATE.clientes.length) {
+    tbody.innerHTML = '<tr class="loading-row"><td colspan="8">Sin clientes. Use "Nuevo Usuario" para agregar.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = STATE.clientes.map(c => `
+    <tr>
+      <td><strong>${c.correlativo||'-'}</strong></td>
+      <td><span style="font-size:11px;color:var(--azul);font-weight:700;">${c.ruc||'-'}</span></td>
+      <td>${c.nombre||'-'}</td>
+      <td><span class="badge badge-${(c.regimen||'').toLowerCase()}">${c.regimen||'-'}</span></td>
+      <td>${c.afp||'-'}</td>
+      <td><span class="badge badge-${c.estado==='ACTIVO'?'activo':'inactivo'}">${c.estado||'-'}</span></td>
+      <td>${c.inicio||'-'}</td>
+      <td><button class="btn-sm btn-sm-primary" onclick="verCliente('${c.ruc}')">📊 Ver</button></td>
+    </tr>`).join('');
+}
+
+function actualizarContadores() {
+  const p = periodoActual();
+  const declarados = new Set(STATE.impuestos.filter(i=>i.periodo===p).map(i=>i.ruc));
+  const pendientes = STATE.clientes.filter(c=>c.estado==='ACTIVO'&&!declarados.has(c.ruc)).length;
+  const total   = STATE.clientes.length;
+  const activos = STATE.clientes.filter(c=>c.estado==='ACTIVO').length;
+  anim('cnt-pendientes', pendientes);
+  anim('cnt-total',   total);
+  anim('cnt-activos', activos);
+  document.getElementById('sub-pendientes').textContent = fmtPeriodo(p);
+}
+function anim(id, val) {
+  const el = document.getElementById(id); let n=0;
+  const t = setInterval(()=>{ n=Math.min(n+Math.ceil(val/20),val); el.textContent=n; if(n>=val)clearInterval(t); },40);
+}
+
+// ============================================================
+//  NUEVO USUARIO
+// ============================================================
+function abrirNuevoUsuario() {
+  document.getElementById('nu-correlativo').value = String(STATE.clientes.length+1).padStart(3,'0');
+  ['nu-ruc','nu-nombre','nu-usuario','nu-password','nu-telefono'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('nu-regimen').value='';
+  document.getElementById('nu-regimen-otros').value='';
+  document.getElementById('nu-regimen-otros').style.display='none';
+  document.getElementById('nu-afp').value='';
+  document.getElementById('afp-detalle-box').style.display='none';
+  document.getElementById('nu-afp-usuario').value='';
+  document.getElementById('nu-afp-clave').value='';
+  document.getElementById('nu-estado').value='ACTIVO';
+  document.getElementById('nu-inicio').value='';
+  document.getElementById('modal-nuevo').classList.add('active');
+}
+function toggleAfpDetalle(val) {
+  const box = document.getElementById('afp-detalle-box');
+  box.style.display = val === 'AFP' ? 'block' : 'none';
+  if (val !== 'AFP') {
+    document.getElementById('nu-afp-usuario').value='';
+    document.getElementById('nu-afp-clave').value='';
+  }
+}
+function toggleOtrosRegimen(val) {
+  const inp = document.getElementById('nu-regimen-otros');
+  inp.style.display = val === 'Otros' ? 'block' : 'none';
+  if (val !== 'Otros') inp.value = '';
+}
+async function grabarCliente() {
+  const ruc=document.getElementById('nu-ruc').value.trim();
+  const nombre=document.getElementById('nu-nombre').value.trim();
+  const usuario=document.getElementById('nu-usuario').value.trim();
+  const password=document.getElementById('nu-password').value;
+  const regimenSel=document.getElementById('nu-regimen').value;
+  const regimenOtros=document.getElementById('nu-regimen-otros').value.trim();
+  const regimen = regimenSel === 'Otros' ? (regimenOtros || 'Otros') : regimenSel;
+  if (!ruc||!nombre||!usuario||!password||!regimenSel){notif('Complete los campos obligatorios (*)','error');return;}
+  if (regimenSel === 'Otros' && !regimenOtros){notif('Especifique el régimen en el campo de texto','error');return;}
+  if (regimenSel === 'AFP' || document.getElementById('nu-afp').value === 'AFP') {
+    const afpU = document.getElementById('nu-afp-usuario').value.trim();
+    const afpC = document.getElementById('nu-afp-clave').value.trim();
+    if (!afpU || !afpC) { notif('Complete usuario y clave AFP','error'); return; }
+  }
+  if (ruc.length<8){notif('RUC inválido','error');return;}
+  if (STATE.clientes.find(c=>c.ruc===ruc)){notif('El RUC ya está registrado','error');return;}
+  const cliente={
+    correlativo:document.getElementById('nu-correlativo').value,
+    ruc,nombre,usuario,password,regimen,
+    afp:document.getElementById('nu-afp').value,
+    afp_usuario:document.getElementById('nu-afp').value==='AFP'?document.getElementById('nu-afp-usuario').value:'',
+    afp_clave:document.getElementById('nu-afp').value==='AFP'?document.getElementById('nu-afp-clave').value:'',
+    estado:document.getElementById('nu-estado').value,
+    inicio:document.getElementById('nu-inicio').value,
+    telefono:document.getElementById('nu-telefono').value
+  };
+  try {
+    const r=await apiPost({accion:'GRABAR_CLIENTE',cliente});
+    if(r.ok){
+      STATE.clientes.push(cliente); renderTabla(); actualizarContadores();
+      cerrarModal('modal-nuevo'); notif(`Cliente ${nombre} registrado exitosamente`,'success');
+    } else notif(r.error||'Error al grabar','error');
+  } catch { notif('Error de conexión','error'); }
+}
+
+// ============================================================
+//  BUSCADOR
+// ============================================================
+function abrirBuscador() {
+  limpiarBusqueda();
+  document.getElementById('modal-buscar').classList.add('active');
+}
+function filtrarClientes(v) {
+  const res=document.getElementById('search-results');
+  if(v.length<2){res.style.display='none';return;}
+  const f=STATE.clientes.filter(c=>c.ruc.includes(v)||(c.nombre||'').toLowerCase().includes(v.toLowerCase())).slice(0,10);
+  res.innerHTML = f.length
+    ? f.map(c=>`<div class="search-item" onclick="seleccionarCliente('${c.ruc}')">
+        ${c.nombre} <span class="ruc-tag">${c.ruc}</span>
+        <span style="float:right" class="badge badge-${c.estado==='ACTIVO'?'activo':'inactivo'}">${c.estado}</span>
+      </div>`).join('')
+    : '<div class="search-item" style="color:var(--texto3);">Sin resultados</div>';
+  res.style.display='block';
+}
+function seleccionarCliente(ruc) {
+  const c=STATE.clientes.find(cl=>cl.ruc===ruc); if(!c)return;
+  STATE.clienteActual=c;
+  document.getElementById('search-results').style.display='none';
+  document.getElementById('buscar-input').value=`${c.nombre} (${c.ruc})`;
+  document.getElementById('info-cliente-data').innerHTML=infoHTML(c);
+  document.getElementById('cliente-seleccionado').style.display='block';
+  anioSelectorB = new Date().getFullYear();
+  document.getElementById('anio-buscar').textContent = anioSelectorB;
+  document.getElementById('buscar-periodo').value = periodoActual();
+  renderMesesBuscar(c.ruc);
+}
+function limpiarBusqueda() {
+  document.getElementById('buscar-input').value='';
+  document.getElementById('search-results').style.display='none';
+  document.getElementById('cliente-seleccionado').style.display='none';
+  STATE.clienteActual=null;
+}
+function consultarTributario() {
+  if(!STATE.clienteActual){notif('Seleccione un cliente','error');return;}
+  const p=document.getElementById('buscar-periodo').value;
+  if(!p){notif('Seleccione un periodo','error');return;}
+  STATE.periodoActual=p;
+  cerrarModal('modal-buscar'); mostrarTributario();
+}
+
+// ============================================================
+//  GENERAR GRID DE MESES (selector visual)
+// ============================================================
+let anioSelectorB = new Date().getFullYear(); // año activo en buscador
+let anioSelectorT = new Date().getFullYear(); // año activo en tributario
+
+function cambiarAnioB(delta) {
+  anioSelectorB += delta;
+  document.getElementById('anio-buscar').textContent = anioSelectorB;
+  if (STATE.clienteActual) renderMesesBuscar(STATE.clienteActual.ruc);
+}
+function cambiarAnioT(delta) {
+  anioSelectorT += delta;
+  document.getElementById('anio-trib').textContent = anioSelectorT;
+  if (STATE.clienteActual) renderMesesTrib(STATE.clienteActual.ruc);
+}
+
+function renderMesesBuscar(ruc) {
+  const conDatos = new Set(STATE.impuestos.filter(i=>i.ruc===ruc).map(i=>i.periodo));
+  const hoy = new Date();
+  const periodoSelec = document.getElementById('buscar-periodo').value;
+  const contenedor = document.getElementById('meses-buscar');
+  contenedor.innerHTML = '';
+  MESES.forEach((mes, idx) => {
+    const mm = String(idx+1).padStart(2,'0');
+    const periodo = `${anioSelectorB}-${mm}`;
+    const esFuturo = (anioSelectorB > hoy.getFullYear()) ||
+                     (anioSelectorB === hoy.getFullYear() && (idx+1) > hoy.getMonth()+1);
+    const btn = document.createElement('button');
+    btn.className = 'mes-btn' +
+      (conDatos.has(periodo) ? ' con-datos' : '') +
+      (periodo === periodoSelec ? ' activo' : '') +
+      (esFuturo ? ' futuro' : '');
+    btn.textContent = mes;
+    btn.disabled = esFuturo;
+    btn.title = conDatos.has(periodo) ? `${mes} ${anioSelectorB} — Con datos` : `${mes} ${anioSelectorB}`;
+    btn.onclick = () => {
+      document.getElementById('buscar-periodo').value = periodo;
+      contenedor.querySelectorAll('.mes-btn').forEach(b=>b.classList.remove('activo'));
+      btn.classList.add('activo');
+    };
+    contenedor.appendChild(btn);
+  });
+}
+
+function renderMesesTrib(ruc) {
+  const conDatos = new Set(STATE.impuestos.filter(i=>i.ruc===ruc).map(i=>i.periodo));
+  const hoy = new Date();
+  const contenedor = document.getElementById('meses-trib');
+  contenedor.innerHTML = '';
+  MESES.forEach((mes, idx) => {
+    const mm = String(idx+1).padStart(2,'0');
+    const periodo = `${anioSelectorT}-${mm}`;
+    const esFuturo = (anioSelectorT > hoy.getFullYear()) ||
+                     (anioSelectorT === hoy.getFullYear() && (idx+1) > hoy.getMonth()+1);
+    const esActivo = periodo === STATE.periodoActual;
+    const btn = document.createElement('button');
+    btn.className = 'mes-btn' +
+      (conDatos.has(periodo) ? ' con-datos' : '') +
+      (esActivo ? ' activo' : '') +
+      (esFuturo ? ' futuro' : '');
+    btn.textContent = mes;
+    btn.disabled = esFuturo;
+    btn.title = conDatos.has(periodo) ? `${mes} ${anioSelectorT} — Con datos` : `${mes} ${anioSelectorT}`;
+    btn.onclick = () => {
+      STATE.periodoActual = periodo;
+      contenedor.querySelectorAll('.mes-btn').forEach(b=>b.classList.remove('activo'));
+      btn.classList.add('activo');
+      const imp = STATE.impuestos.find(i=>i.ruc===STATE.clienteActual.ruc&&i.periodo===periodo)||{};
+      STATE.tributarioActual = imp;
+      document.getElementById('trib-periodo-label').textContent = fmtPeriodo(periodo);
+      renderTarjetasTrib(imp);
+      document.getElementById('modo-edicion').style.display='none';
+      document.getElementById('btn-editar').style.display='flex';
+      document.getElementById('btn-guardar').style.display='none';
+    };
+    contenedor.appendChild(btn);
+  });
+}
+
+// ============================================================
+//  MOSTRAR TRIBUTARIO
+// ============================================================
+function verCliente(ruc) {
+  const c=STATE.clientes.find(cl=>cl.ruc===ruc); if(!c)return;
+  STATE.clienteActual=c; STATE.periodoActual=periodoActual();
+  mostrarTributario();
+}
+function mostrarTributario() {
+  const c=STATE.clienteActual; const p=STATE.periodoActual;
+  const imp=STATE.impuestos.find(i=>i.ruc===c.ruc&&i.periodo===p)||{};
+  STATE.tributarioActual=imp;
+
+  document.getElementById('info-trib-cliente').innerHTML=infoHTML(c);
+  document.getElementById('trib-periodo-label').textContent=fmtPeriodo(p);
+
+  // Grid de meses en modal tributario
+  anioSelectorT = parseInt(p.split('-')[0]);
+  document.getElementById('anio-trib').textContent = anioSelectorT;
+  renderMesesTrib(c.ruc);
+
+  renderTarjetasTrib(imp);
+  document.getElementById('modo-edicion').style.display='none';
+  document.getElementById('btn-editar').style.display='flex';
+  document.getElementById('btn-guardar').style.display='none';
+  document.getElementById('modal-tributario').classList.add('active');
+}
+
+function renderTarjetasTrib(imp) {
+  const fmt=v=>v?`S/. ${parseFloat(v).toLocaleString('es-PE',{minimumFractionDigits:2})}`:'S/. 0.00';
+  const saldo=parseFloat(imp.saldo||0);
+  document.getElementById('tributario-grid').innerHTML=`
+    <div class="trib-card"><div class="tc-label">📦 Compras</div><div class="tc-val">${fmt(imp.compras)}</div></div>
+    <div class="trib-card"><div class="tc-label">🛒 Ventas</div><div class="tc-val">${fmt(imp.ventas)}</div></div>
+    <div class="trib-card igv"><div class="tc-label">📊 IGV</div><div class="tc-val">${fmt(imp.igv)}</div></div>
+    <div class="trib-card renta"><div class="tc-label">📋 Renta</div><div class="tc-val">${fmt(imp.renta)}</div></div>
+    <div class="trib-card"><div class="tc-label">👥 Planilla</div><div class="tc-val">${fmt(imp.planilla)}</div></div>
+    <div class="trib-card ${saldo>=0?'sp':'sn'}"><div class="tc-label">💰 Saldo</div><div class="tc-val">${fmt(imp.saldo)}</div></div>`;
+}
+
+// ============================================================
+//  EDITAR
+// ============================================================
+function toggleEdicion() {
+  const m=document.getElementById('modo-edicion');
+  const imp=STATE.tributarioActual||{};
+  if(m.style.display==='none'){
+    document.getElementById('ed-compras').value=imp.compras||'';
+    document.getElementById('ed-ventas').value=imp.ventas||'';
+    document.getElementById('ed-igv').value=imp.igv||'';
+    document.getElementById('ed-renta').value=imp.renta||'';
+    document.getElementById('ed-planilla').value=imp.planilla||'';
+    document.getElementById('ed-saldo').value=imp.saldo||'';
+    m.style.display='block';
+    document.getElementById('btn-editar').style.display='none';
+    document.getElementById('btn-guardar').style.display='flex';
+  } else {
+    m.style.display='none';
+    document.getElementById('btn-editar').style.display='flex';
+    document.getElementById('btn-guardar').style.display='none';
+  }
+}
+async function guardarCambiosTributarios() {
+  const c=STATE.clienteActual; const p=STATE.periodoActual;
+  const datos={
+    ruc:c.ruc, nombre:c.nombre, periodo:p,
+    compras:  document.getElementById('ed-compras').value,
+    ventas:   document.getElementById('ed-ventas').value,
+    igv:      document.getElementById('ed-igv').value,
+    renta:    document.getElementById('ed-renta').value,
+    planilla: document.getElementById('ed-planilla').value,
+    saldo:    document.getElementById('ed-saldo').value
+  };
+  try {
+    const r=await apiPost({accion:'GUARDAR_IMPUESTO',datos});
+    if(r.ok){
+      const idx=STATE.impuestos.findIndex(i=>i.ruc===c.ruc&&i.periodo===p);
+      if(idx>=0) STATE.impuestos[idx]=datos; else STATE.impuestos.push(datos);
+      STATE.tributarioActual=datos;
+      actualizarContadores();
+      renderTarjetasTrib(datos);
+      renderMesesTrib(c.ruc);
+      document.getElementById('modo-edicion').style.display='none';
+      document.getElementById('btn-editar').style.display='flex';
+      document.getElementById('btn-guardar').style.display='none';
+      notif('Cambios guardados exitosamente','success');
+    } else notif(r.error||'Error al guardar','error');
+  } catch { notif('Error de conexión','error'); }
+}
+
+// ============================================================
+//  REPORTE
+// ============================================================
+function imprimirReporte() {
+  const c=STATE.clienteActual; const p=STATE.periodoActual;
+  const imp=STATE.tributarioActual||{};
+  const hoy=new Date().toLocaleDateString('es-PE');
+  const fmt=v=>v?`S/. ${parseFloat(v).toLocaleString('es-PE',{minimumFractionDigits:2})}`:'S/. 0.00';
+  document.getElementById('reporte-contenido').innerHTML=`
+    <div style="border-bottom:3px solid #1565c0;padding-bottom:18px;margin-bottom:22px;display:flex;align-items:center;justify-content:space-between;">
+      <div><div style="font-size:18px;font-weight:700;color:#1565c0;letter-spacing:2px;">REPORTE TRIBUTARIO</div>
+      <div style="font-size:10px;color:#666;letter-spacing:1px;margin-top:3px;">SISTEMA DE GESTIÓN TRIBUTARIA</div></div>
+      <div style="text-align:right;font-size:11px;color:#666;">
+        <div>Emisión: <strong>${hoy}</strong></div>
+        <div>Periodo: <strong>${fmtPeriodo(p)}</strong></div>
+      </div>
+    </div>
+    <div style="background:#f5f7fa;border-radius:8px;padding:18px;margin-bottom:22px;">
+      <div style="font-size:10px;font-weight:700;color:#1565c0;letter-spacing:1px;margin-bottom:10px;">DATOS DEL CONTRIBUYENTE</div>
+      <table style="width:100%;font-size:12px;border-collapse:collapse;">
+        <tr><td style="padding:3px 0;color:#666;width:140px;">RUC:</td><td style="font-weight:700;">${c.ruc}</td><td style="color:#666;width:140px;">Régimen:</td><td style="font-weight:700;">${c.regimen}</td></tr>
+        <tr><td style="padding:3px 0;color:#666;">Razón Social:</td><td colspan="3" style="font-weight:700;">${c.nombre}</td></tr>
+        <tr><td style="padding:3px 0;color:#666;">AFP:</td><td style="font-weight:700;">${c.afp||'—'}</td><td style="color:#666;">Estado:</td><td style="font-weight:700;">${c.estado}</td></tr>
+        <tr><td style="padding:3px 0;color:#666;">Inicio Op.:</td><td style="font-weight:700;">${c.inicio||'—'}</td><td style="color:#666;">Correlativo:</td><td style="font-weight:700;">${c.correlativo||'—'}</td></tr>
+      </table>
+    </div>
+    <div style="font-size:10px;font-weight:700;color:#1565c0;letter-spacing:1px;margin-bottom:10px;">RESUMEN TRIBUTARIO — ${fmtPeriodo(p)}</div>
+    <table style="width:100%;border-collapse:collapse;font-size:12px;">
+      <thead><tr style="background:#1565c0;color:#fff;">
+        <th style="padding:9px 14px;text-align:left;">CONCEPTO</th>
+        <th style="padding:9px 14px;text-align:right;">IMPORTE (S/.)</th>
+      </tr></thead>
+      <tbody>
+        <tr style="border-bottom:1px solid #eee;"><td style="padding:9px 14px;">Compras</td><td style="padding:9px 14px;text-align:right;">${fmt(imp.compras)}</td></tr>
+        <tr style="border-bottom:1px solid #eee;background:#fafafa;"><td style="padding:9px 14px;">Ventas</td><td style="padding:9px 14px;text-align:right;">${fmt(imp.ventas)}</td></tr>
+        <tr style="border-bottom:1px solid #eee;"><td style="padding:9px 14px;">IGV</td><td style="padding:9px 14px;text-align:right;font-weight:700;color:#1565c0;">${fmt(imp.igv)}</td></tr>
+        <tr style="border-bottom:1px solid #eee;background:#fafafa;"><td style="padding:9px 14px;">Renta</td><td style="padding:9px 14px;text-align:right;">${fmt(imp.renta)}</td></tr>
+        <tr style="border-bottom:1px solid #eee;"><td style="padding:9px 14px;">Planilla</td><td style="padding:9px 14px;text-align:right;">${fmt(imp.planilla)}</td></tr>
+        <tr style="background:#e3f2fd;font-weight:700;">
+          <td style="padding:9px 14px;color:#1565c0;">SALDO FINAL</td>
+          <td style="padding:9px 14px;text-align:right;color:#1565c0;font-size:14px;">${fmt(imp.saldo)}</td>
+        </tr>
+      </tbody>
+    </table>
+    <div style="margin-top:44px;display:grid;grid-template-columns:1fr 1fr;gap:40px;">
+      <div style="border-top:1px solid #ccc;padding-top:8px;text-align:center;font-size:10px;color:#666;">FIRMA DEL RESPONSABLE<br><br>_______________________________</div>
+      <div style="border-top:1px solid #ccc;padding-top:8px;text-align:center;font-size:10px;color:#666;">SELLO DE LA EMPRESA<br><br>_______________________________</div>
+    </div>
+    <div style="margin-top:20px;font-size:9px;color:#aaa;text-align:center;border-top:1px solid #eee;padding-top:10px;">Documento generado por Sistema de Gestión Tributaria — ${hoy}</div>`;
+  cerrarModal('modal-tributario');
+  document.getElementById('modal-reporte').classList.add('active');
+}
+
+// ============================================================
+//  CONFIG
+// ============================================================
+function abrirModalConfig() { document.getElementById('modal-config').classList.add('active'); }
+function guardarConfigPanel() {
+  const url=document.getElementById('sheets-url-panel').value.trim();
+  if(!url){notif('Ingrese la URL','error');return;}
+  CONFIG.sheetsUrl=url; localStorage.setItem('gt_url',url);
+  document.getElementById('config-panel').classList.remove('show');
+  notif('URL guardada. Cargando...','success'); cargarDatos();
+}
+function guardarConfigCompleta() {
+  const url=document.getElementById('config-url').value.trim();
+  if(!url){notif('Ingrese la URL del Web App','error');return;}
+  CONFIG.sheetsUrl=url; localStorage.setItem('gt_url',url);
+  const u=document.getElementById('config-admin-user').value.trim();
+  const p=document.getElementById('config-admin-pass').value;
+  if(u){CONFIG.adminUser=u; localStorage.setItem('gt_user',u);}
+  if(p){CONFIG.adminPass=p; localStorage.setItem('gt_pass',p);}
+  cerrarModal('modal-config'); notif('Configuración guardada','success');
+}
+
+// ============================================================
+//  UTILIDADES
+// ============================================================
+function getPass(c) {
+  return c.password || c.contrasena || c.clave || c.pass || c.passwd || c.pwd
+      || c.PASSWORD || c.CLAVE || c.CONTRASENA || c['contraseña'] || c['CONTRASEÑA'] || '—';
+}
+function getUsuario(c) {
+  return c.usuario || c.user || c.username || c.USUARIO || c.USER || '—';
+}
+function infoHTML(c) {
+  return `
+    <div class="info-item"><div class="ii-label">RUC</div><div class="ii-val">${c.ruc}</div></div>
+    <div class="info-item"><div class="ii-label">Nombre</div><div class="ii-val">${c.nombre}</div></div>
+    <div class="info-item"><div class="ii-label">Régimen</div><div class="ii-val">${c.regimen}</div></div>
+    <div class="info-item"><div class="ii-label">AFP</div><div class="ii-val">${c.afp||'—'}</div></div>
+    <div class="info-item"><div class="ii-label">Estado</div><div class="ii-val">${c.estado}</div></div>
+    <div class="info-item"><div class="ii-label">Correlativo</div><div class="ii-val">${c.correlativo||'—'}</div></div>
+    <div class="info-item" style="border-top:1px solid var(--borde);padding-top:8px;margin-top:4px;"><div class="ii-label" style="color:var(--azul);">👤 Usuario</div><div class="ii-val" style="color:var(--azul);font-weight:700;">${getUsuario(c)}</div></div>
+    <div class="info-item" style="border-top:1px solid var(--borde);padding-top:8px;margin-top:4px;"><div class="ii-label" style="color:#e65100;">🔑 Contraseña</div><div class="ii-val" style="color:#e65100;font-weight:700;letter-spacing:1px;">${getPass(c)}</div></div>
+    ${(c.afp_usuario||c.afp_clave) ? `
+    <div class="info-item" style="border-top:1px solid var(--borde);padding-top:8px;margin-top:4px;grid-column:1/-1;background:#e8f0fe;border-radius:6px;padding:8px 12px;">
+      <div class="ii-label" style="color:var(--azul);font-weight:700;margin-bottom:6px;">🏦 Datos AFP</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <div><div class="ii-label">👤 Usuario AFP</div><div class="ii-val" style="color:var(--azul);font-weight:700;">${c.afp_usuario||'—'}</div></div>
+        <div><div class="ii-label" style="color:#e65100;">🔑 Clave AFP</div><div class="ii-val" style="color:#e65100;font-weight:700;letter-spacing:1px;">${c.afp_clave||'—'}</div></div>
+      </div>
+    </div>` : ''}
+  `;
+}
+function cerrarModal(id) { document.getElementById(id).classList.remove('active'); }
+function notif(msg, tipo='info') {
+  const d=document.createElement('div');
+  d.className=`notif notif-${tipo}`;
+  d.textContent=(tipo==='success'?'✅ ':tipo==='error'?'❌ ':'ℹ️ ')+msg;
+  document.body.appendChild(d);
+  setTimeout(()=>d.remove(), 3200);
+}
+document.querySelectorAll('.modal-overlay').forEach(o=>o.addEventListener('click',e=>{ if(e.target===o)o.classList.remove('active'); }));
+
+// ============================================================
+//  EDITAR CLIENTE
+// ============================================================
+function toggleAfpDetalleEC(val) {
+  const box = document.getElementById('afp-detalle-ec');
+  box.style.display = val === 'AFP' ? 'block' : 'none';
+  if (val !== 'AFP') {
+    document.getElementById('ec-afp-usuario').value = '';
+    document.getElementById('ec-afp-clave').value   = '';
+  }
+}
+function abrirEditarCliente() {
+  const c = STATE.clienteActual; if (!c) return;
+  document.getElementById('ec-correlativo').value = c.correlativo || '';
+  document.getElementById('ec-ruc').value         = c.ruc || '';
+  document.getElementById('ec-nombre').value      = c.nombre || '';
+  document.getElementById('ec-usuario').value     = c.usuario || '';
+  document.getElementById('ec-password').value    = c.password || '';
+  document.getElementById('ec-regimen').value     = c.regimen || '';
+  document.getElementById('ec-afp').value         = c.afp || '';
+  document.getElementById('ec-estado').value      = c.estado || 'ACTIVO';
+  document.getElementById('ec-inicio').value      = c.inicio || '';
+  document.getElementById('ec-telefono').value    = c.telefono || '';
+  // AFP detalle
+  const tieneAfp = c.afp === 'AFP';
+  document.getElementById('afp-detalle-ec').style.display = tieneAfp ? 'block' : 'none';
+  document.getElementById('ec-afp-usuario').value = c.afp_usuario || '';
+  document.getElementById('ec-afp-clave').value   = c.afp_clave   || '';
+  document.getElementById('modal-editar-cliente').classList.add('active');
+}
+async function guardarEdicionCliente() {
+  const c = STATE.clienteActual; if (!c) return;
+  const nombre   = document.getElementById('ec-nombre').value.trim();
+  const usuario  = document.getElementById('ec-usuario').value.trim();
+  const password = document.getElementById('ec-password').value;
+  const regimen  = document.getElementById('ec-regimen').value;
+  const afp      = document.getElementById('ec-afp').value;
+  const estado   = document.getElementById('ec-estado').value;
+  const inicio   = document.getElementById('ec-inicio').value;
+  const telefono = document.getElementById('ec-telefono').value.trim();
+  const afpU     = document.getElementById('ec-afp-usuario').value.trim();
+  const afpC     = document.getElementById('ec-afp-clave').value.trim();
+  if (!nombre || !usuario || !regimen) { notif('Complete los campos obligatorios (*)','error'); return; }
+  const clienteActualizado = {
+    ...c, nombre, usuario, regimen, afp, estado, inicio, telefono,
+    afp_usuario: afp === 'AFP' ? afpU : '',
+    afp_clave:   afp === 'AFP' ? afpC : '',
+    ...(password ? { password } : {})
+  };
+  try {
+    const r = await apiPost({ accion:'ACTUALIZAR_CLIENTE', cliente: clienteActualizado });
+    if (r.ok) {
+      // Actualizar en memoria
+      const idx = STATE.clientes.findIndex(cl => cl.ruc === c.ruc);
+      if (idx >= 0) STATE.clientes[idx] = clienteActualizado;
+      STATE.clienteActual = clienteActualizado;
+      // Refrescar info en modal tributario
+      document.getElementById('info-trib-cliente').innerHTML = infoHTML(clienteActualizado);
+      renderTabla();
+      cerrarModal('modal-editar-cliente');
+      notif('Cliente actualizado correctamente','success');
+    } else notif(r.error || 'Error al actualizar','error');
+  } catch { notif('Error de conexión','error'); }
+}
+</script>
+</body>
+</html>
